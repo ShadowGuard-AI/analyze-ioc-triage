@@ -1,3 +1,5 @@
+![Banner](banner.png)
+
 # analyze-ioc-triage
 Quickly triages multiple IOCs (IP addresses, domains, hashes) against public threat intelligence feeds (e.g., VirusTotal, AbuseIPDB) to prioritize investigation. - Focused on Data analysis and reporting
 
