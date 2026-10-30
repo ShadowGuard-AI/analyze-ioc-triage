@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import hashlib
 import requests  # For interacting with APIs
+import sys
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -24,7 +25,8 @@ def setup_argparse():
 def validate_ioc(ioc):
     """
     Validates the given IOC based on type (IP, domain, hash).  Basic validation only.
-    More robust validation can be implemented later using regex etc.
+    Validation stays basic on purpose: it only sorts IOCs into the
+    lookup buckets, it does not judge whether an IOC is real.
     Args:
         ioc (str): The IOC to validate.
     Returns:
@@ -74,7 +76,9 @@ def get_virustotal_report(ioc, api_key):
 
     headers = {"x-apikey": api_key}
     try:
-        response = requests.get(url, headers=headers)
+        # No timeout here meant one hung feed stalled the whole batch, not
+        # just this one lookup.
+        response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -109,7 +113,7 @@ def get_abuseipdb_report(ip_address, api_key):
     }
 
     try:
-        response = requests.get(url, headers=headers, params=params)
+        response = requests.get(url, headers=headers, params=params, timeout=10)
         response.raise_for_status()  # Raise HTTPError for bad responses
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -126,13 +130,15 @@ def main():
 
     try:
         with open(args.ioc_file, 'r') as f:
-            iocs = [line.strip() for line in f]
+            # Blank lines are skipped: an empty string triages as an
+            # 'unknown' IOC and adds a junk row to the report.
+            iocs = [line.strip() for line in f if line.strip()]
     except FileNotFoundError:
         logging.error(f"IOC file not found: {args.ioc_file}")
-        return
+        sys.exit(1)
     except Exception as e:
         logging.error(f"Error reading IOC file: {e}")
-        return
+        sys.exit(1)
 
     results = []
     for ioc in iocs:
@@ -190,6 +196,7 @@ def main():
         logging.info(f"Report saved to: {args.output}")
     except Exception as e:
         logging.error(f"Error saving report to CSV: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
