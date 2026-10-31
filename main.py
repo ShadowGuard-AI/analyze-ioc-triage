@@ -18,8 +18,8 @@ def setup_argparse():
     parser = argparse.ArgumentParser(description="Quickly triage multiple IOCs against public threat intelligence feeds.")
     parser.add_argument("ioc_file", help="Path to a file containing IOCs (one IOC per line).")
     parser.add_argument("--output", "-o", default="ioc_report.csv", help="Path to the output CSV file. Defaults to ioc_report.csv")
-    parser.add_argument("--virustotal_api_key", "-vt", help="Your VirusTotal API key (optional).")
-    parser.add_argument("--abuseipdb_api_key", "-ab", help="Your AbuseIPDB API key (optional).")  # Added AbuseIPDB API Key
+    parser.add_argument("--virustotal_api_key", "-vt", help="Your VirusTotal API key. Prefer the VIRUSTOTAL_API_KEY environment variable: a key given on the command line is visible in shell history and process listings.")
+    parser.add_argument("--abuseipdb_api_key", "-ab", help="Your AbuseIPDB API key. Prefer the ABUSEIPDB_API_KEY environment variable: a key given on the command line is visible in shell history and process listings.")  # Added AbuseIPDB API Key
     return parser
 
 def validate_ioc(ioc):
@@ -128,6 +128,20 @@ def main():
     parser = setup_argparse()
     args = parser.parse_args()
 
+    # The documented route is the environment: a key on the command line
+    # is recorded in shell history and visible in process listings, so
+    # that fallback logs a warning whenever it is used.
+    virustotal_api_key = args.virustotal_api_key or os.environ.get("VIRUSTOTAL_API_KEY")
+    abuseipdb_api_key = args.abuseipdb_api_key or os.environ.get("ABUSEIPDB_API_KEY")
+    if args.virustotal_api_key:
+        logging.warning("VirusTotal API key supplied on the command line: it is visible in shell history and process listings. Prefer the VIRUSTOTAL_API_KEY environment variable.")
+    if args.abuseipdb_api_key:
+        logging.warning("AbuseIPDB API key supplied on the command line: it is visible in shell history and process listings. Prefer the ABUSEIPDB_API_KEY environment variable.")
+
+    if not virustotal_api_key and not abuseipdb_api_key:
+        logging.error("No API key supplied: set VIRUSTOTAL_API_KEY or ABUSEIPDB_API_KEY, or pass a key option. No lookups were performed, so no report was written.")
+        sys.exit(1)
+
     try:
         with open(args.ioc_file, 'r') as f:
             # Blank lines are skipped: an empty string triages as an
@@ -146,12 +160,33 @@ def main():
         logging.info(f"Analyzing IOC: {ioc} (Type: {ioc_type})")
 
         vt_report = None
-        if args.virustotal_api_key:
-             vt_report = get_virustotal_report(ioc, args.virustotal_api_key)
+        if virustotal_api_key:
+             vt_report = get_virustotal_report(ioc, virustotal_api_key)
 
         ab_report = None
-        if ioc_type == 'ip' and args.abuseipdb_api_key:
-            ab_report = get_abuseipdb_report(ioc, args.abuseipdb_api_key) # Only check IPs on AbuseIPDB
+        if ioc_type == 'ip' and abuseipdb_api_key:
+            ab_report = get_abuseipdb_report(ioc, abuseipdb_api_key) # Only check IPs on AbuseIPDB
+
+        # Per IOC lookup status: a blank verdict can mean the lookup was
+        # never run, it failed, or it ran and returned no data, and a
+        # reader of the report has to be able to tell those apart.
+        if not virustotal_api_key or ioc_type == 'unknown':
+            vt_status = "not run"
+        elif vt_report is None:
+            vt_status = "failed"
+        elif vt_report.get("data") and vt_report["data"].get("attributes") and vt_report["data"]["attributes"].get("last_analysis_stats"):
+            vt_status = "completed"
+        else:
+            vt_status = "no data"
+        if not abuseipdb_api_key or ioc_type != 'ip':
+            ab_status = "not run"
+        elif ab_report is None:
+            ab_status = "failed"
+        elif ab_report.get("data"):
+            ab_status = "completed"
+        else:
+            ab_status = "no data"
+        lookup_status = f"VirusTotal: {vt_status}; AbuseIPDB: {ab_status}"
 
         # Extract relevant data from reports (customize as needed)
         vt_malicious = None
@@ -180,6 +215,7 @@ def main():
         results.append({
             "IOC": ioc,
             "IOC Type": ioc_type,
+            "Lookup Status": lookup_status,
             "VT Malicious": vt_malicious,
             "VT Suspicious": vt_suspicious,
             "VT Harmless": vt_harmless,
