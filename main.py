@@ -33,7 +33,12 @@ def validate_ioc(ioc):
         str: The IOC type ('ip', 'domain', 'hash', or 'unknown').
     """
     try:
-        # Basic IP validation (e.g., four octets separated by dots)
+        # The order of these checks decides the awkward cases. An
+        # address with a bad octet, 1.2.3.999, fails the IP test and
+        # then qualifies as a domain by containing dots. A full URL
+        # also lands in domain, path and all, and is sent to the
+        # domains endpoint as written. The hash test below only sees
+        # strings with no dot in them at all.
         if ioc.count('.') == 3 and all(part.isdigit() and 0 <= int(part) <= 255 for part in ioc.split('.')):
             return 'ip'
 
@@ -155,6 +160,12 @@ def main():
         sys.exit(1)
 
     results = []
+    # No deduplication and no delay between lookups. A file listing the
+    # same IOC ten times spends ten lookups on it and produces ten
+    # identical rows, and a long list can hit the feeds' rate limits,
+    # after which the remaining rows come back failed rather than
+    # unlooked up. I run it as written for the short lists this was
+    # built for; a batch big enough to matter needs both fixed.
     for ioc in iocs:
         ioc_type = validate_ioc(ioc)
         logging.info(f"Analyzing IOC: {ioc} (Type: {ioc_type})")
