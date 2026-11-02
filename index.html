@@ -3,164 +3,86 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Analyze Ioc Triage: what it is, how it runs, where it stops</title>
-<meta name="description" content="Analyze Ioc Triage is one of my projects. The README in the repo is short, so this page sticks to what the files themselves show.">
+<title>analyze-ioc-triage: Kelp Cathedral Canopy</title>
+<meta name="description" content="analyze-ioc-triage quickly triages multiple IOCs, IP addresses, domains, and hashes, against public threat intelligence feeds such as VirusTotal and AbuseIPDB, to prioritize investigation.">
 <style>
-:root {
-  --bg: #1e2014; --panel: #2c2e1e; --ink: #eeecdc;
-  --mut: #3b3e28;
-  --acc: #ceb25c; --acc2: #b2603e;
-  --line: #2c2e1e;
-}
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink);
-  font-family: Verdana, Geneva, sans-serif; line-height: 1.55; }
-code, pre, .mono { font-family: 'Lucida Console', monospace; }
-a { color: var(--acc2); }
-.hero { padding: 3rem 6vw 1rem; }
-.hero img.banner { width: 100%; height: auto; border: 1px solid var(--line);
-  border-radius: 10px; }
-.logo { width: 92px; height: 92px; border-radius: 18px;
-  border: 1px solid var(--line); }
-h1 { font-size: 2.4rem; margin: 0.4em 0 0.1em; }
-h2 { border-bottom: 2px solid var(--acc); padding-bottom: 0.2em;
-  margin-top: 2em; }
-.lede { font-size: 1.15rem; max-width: 62ch; }
-main { padding: 0 6vw 3rem; max-width: 1180px; margin: 0 auto; }
-.grid { display: grid; gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
-.card { background: var(--panel); border: 1px solid var(--line);
-  border-radius: 12px; padding: 1rem 1.2rem; }
-.card.pop { animation: rise 0.7s ease both; }
-@keyframes rise { from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: none; } }
-pre.code { background: #101014; color: #e8e6df; padding: 1rem 1.2rem;
-  border-radius: 12px; overflow-x: auto; font-size: 0.86rem;
-  border-left: 5px solid var(--acc); }
-table { border-collapse: collapse; width: 100%; }
-td, th { border-bottom: 1px solid var(--line); padding: 0.45rem 0.6rem;
-  text-align: left; }
-.shots { display: grid; gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-.shots img { width: 100%; height: auto; border: 1px solid var(--line);
-  border-radius: 10px; background: #f4f1e8; }
-footer { padding: 2rem 6vw; border-top: 1px solid var(--line);
-  color: var(--mut); }
-.rail { display: flex; gap: 1.2rem; align-items: flex-start; }
-.rail nav { position: sticky; top: 1rem; min-width: 180px; }
-@media (max-width: 760px) { .rail { flex-direction: column; }
-  .rail nav { position: static; } }
-@media (prefers-reduced-motion: reduce) {
-  .card.pop { animation: none; } * { scroll-behavior: auto; } }
+@font-face{font-family:'Averia Libre';src:url('fonts/AveriaLibre.ttf') format('truetype');}
+@font-face{font-family:'Alegreya Sans';src:url('fonts/AlegreyaSans.ttf') format('truetype');}
+:root{--shadow:#102a42;--green:#165434;--deep:#1d6a44;--amber:#d8a43c;--pale:#f0d082}
+*{box-sizing:border-box}body{margin:0;background:var(--shadow);color:#e9efe4;font-family:'Alegreya Sans',sans-serif;line-height:1.8}
+h1,h2{font-family:'Averia Libre',serif;color:var(--amber)}
+.hero{min-height:100vh;display:flex;flex-direction:column}
+.hero img.intro{width:100%;height:52vh;object-fit:cover;display:block}
+.hero .plate{padding:1.2rem 6vw 1.6rem}
+.logo{width:150px}
+.wrap{display:flex;gap:0;max-width:1180px;margin:0 auto;width:100%}
+.sounding{flex:0 0 34px;border-right:3px solid rgba(216,164,60,.55);position:relative;margin-left:6vw}
+.sounding:before{content:'';position:absolute;right:-8px;top:0;bottom:0;background:repeating-linear-gradient(180deg,var(--amber) 0 3px,transparent 3px 74px);width:13px}
+main{padding:0 6vw 3rem 2rem;flex:1}
+nav{display:flex;gap:.9rem;flex-wrap:wrap;margin:1rem 0}
+.shellbtn{display:inline-block;background:radial-gradient(ellipse at 35% 30%,#bfe3d8,#7fae9d 45%,#c99ab8 78%,#8fb8a4);color:var(--shadow);font-family:'Averia Libre',serif;text-decoration:none;padding:.65rem 1.3rem;border:3px solid var(--amber);border-radius:50%/62%}
+.shellbtn:hover{filter:brightness(1.18) saturate(1.25)}
+.shellbtn:active{transform:rotate(1deg)}
+.shellbtn:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+.mat{background:linear-gradient(180deg,#1d6a44,#165434);padding:.2rem 1.5rem 1.4rem;margin:1.8rem 0;border-top:9px solid transparent;border-image:linear-gradient(90deg,var(--amber),#8a742e,var(--amber)) 1}
+.mat h2{margin-top:.8rem}
+.mat pre{background:var(--shadow);color:#e9efe4;padding:1rem;overflow-x:auto;line-height:1.55}
+a{color:var(--pale)}a:before{content:'';display:inline-block;width:12px;height:13px;border-radius:50%;background:var(--amber);margin-right:.5em;vertical-align:-1px;transition:transform .2s}
+a:hover:before{transform:scale(1.3);background:var(--pale)}
+.shellbtn:before{content:none}
+.soundingline{height:14px;margin:2rem 0;border-top:3px solid #0a1e30;position:relative}
+.soundingline:before{content:'';position:absolute;left:0;right:0;top:-6px;height:9px;background:repeating-linear-gradient(90deg,var(--amber) 0 3px,transparent 3px 130px)}
+.soundingline:after{content:'';position:absolute;left:50%;top:-9px;width:4px;height:15px;background:var(--amber)}
+.holdfast{background:var(--shadow);border-radius:18px;padding:.9rem 1.2rem;margin:1rem 0;color:var(--pale);box-shadow:0 10px 0 -4px #0a1e30}
+footer{padding:1rem 6vw 2.4rem;max-width:1180px;margin:0 auto}
 </style>
 </head>
-<body class="layout-rail">
-<!-- This page exists for analyze-ioc-triage alone: the layout (sidebar-rail),
-     the colors, and the type were picked for this project, not
-     shared with the other project pages. The code block below is
-     copied from the file it names, line for line. If it looks
-     plain, that is because the project is plain, and I would
-     rather the page match the project than dress it up. The one
-     thing I will not do here is oversell: what this project does
-     not do is stated on the page, not hidden from it. -->
+<body>
 <header class="hero">
-  <img class="logo" src="assets/logo.png" alt="Analyze Ioc Triage logo">
-  <img class="banner" src="assets/banner.png" alt="">
-  <h1>Analyze Ioc Triage</h1>
-  <p class="mono"><a href="https://github.com/ShadowGuard-AI/analyze-ioc-triage">github.com/ShadowGuard-AI/analyze-ioc-triage</a></p>
+<img class="intro" src="assets/intro-banner.png" alt="A kelp forest alone: fronds and amber bladders in the foreground, a sleeping otter anchored by a looped strand at the surface, shafts of light, still fish, and two pale gulls on the bright canopy mat, no text">
+<div class="plate">
+<img class="logo" src="assets/logo.png" alt="Sea otter floating on its back among kelp fronds, an amber strand looped around its body, amber bladders along the stems and one abalone shell at the lower edge">
+<h1>analyze-ioc-triage</h1>
+<p>A descent that ends at the canopy, with content stations hung at depths along a sounding line down the left margin.</p>
+<nav>
+<a class="shellbtn" href="#surface">Surface: the charge</a>
+<a class="shellbtn" href="#keys">Station of the keys</a>
+<a class="shellbtn" href="#aboard">Getting aboard</a>
+<a class="shellbtn" href="#deep">Deep: the report</a>
+</nav>
+</div>
+<img src="assets/banner.png" alt="Kelp forest canopy with light in shafts, two gulls on the floating mat, a sleeping otter wrapped in a frond in the foreground, and the project name lettered in pale amber along the underside of the canopy" style="width:100%;display:block">
 </header>
-
+<div class="wrap">
+<div class="sounding" aria-hidden="true"></div>
 <main>
-  <section class="rail">
-    <nav aria-label="on this page">
-      <p class="mono"><a href="#run">Run it</a><br>
-      <a href="#files">The files</a><br>
-      <a href="#sheets">The sheets</a><br>
-      <a href="https://github.com/ShadowGuard-AI/analyze-ioc-triage">The repo</a></p>
-    </nav>
-    <div>
-      <p class="lede">Analyze Ioc Triage is one of my projects. The README in the repo is short, so this page sticks to what the files themselves show.</p>
-      <div class="grid">
-        <div class="card pop"><h3>What it is</h3>
-          <p>Analyze Ioc Triage: 5 files, 223 counted
-          lines across Python 202, Markdown 19, Text 2. One job, done in the
-          open, in files you can read.</p></div>
-        <div class="card pop"><h3>The biggest piece</h3>
-          <p><code>main.py</code> carries the most
-          lines. If the project grows, that file is where the growth
-          lands first, for better or worse.</p></div>
-        <div class="card pop"><h3>The honest gap</h3>
-          <p>No test files yet. That is the honest gap, and the roadmap in the visuals folder says what the first one should cover.</p></div>
-      </div>
-      <section id="run">
-        <h2>Run it</h2>
-        <p>The repo README has the exact commands for this one. The
-        shape is the shape for most of my projects: clone it, read the
-        top file first so you know what will happen, then run it on
-        something you do not mind breaking.</p>
-        <p class="mono">$ git clone https://github.com/ShadowGuard-AI/analyze-ioc-triage.git<br>$ cd analyze-ioc-triage</p>
-      </section>
-      
-  <section aria-label="real code">
-    <h2>The code, as it sits in the repo</h2>
-    <p>From <code>main.py</code>, line 10 on. I did
-    not tidy it for the page. What you see is what the file has.</p>
-    <pre class="code"><code>logging.basicConfig(level=logging.INFO, format=&#x27;%(asctime)s - %(levelname)s - %(message)s&#x27;)
-
-def setup_argparse():
-    &quot;&quot;&quot;
-    Sets up the argument parser for the command-line interface.
-    Returns:
-        argparse.ArgumentParser: The configured argument parser.
-    &quot;&quot;&quot;
-    parser = argparse.ArgumentParser(description=&quot;Quickly triage multiple IOCs against public threat intelligence feeds.&quot;)
-    parser.add_argument(&quot;ioc_file&quot;, help=&quot;Path to a file containing IOCs (one IOC per line).&quot;)
-    parser.add_argument(&quot;--output&quot;, &quot;-o&quot;, default=&quot;ioc_report.csv&quot;, help=&quot;Path to the output CSV file. Defaults to ioc_report.csv&quot;)
-    parser.add_argument(&quot;--virustotal_api_key&quot;, &quot;-vt&quot;, help=&quot;Your VirusTotal API key (optional).&quot;)
-    parser.add_argument(&quot;--abuseipdb_api_key&quot;, &quot;-ab&quot;, help=&quot;Your AbuseIPDB API key (optional).&quot;)  # Added AbuseIPDB API Key
-    return parser
-
-def validate_ioc(ioc):
-    &quot;&quot;&quot;
-    Validates the given IOC based on type (IP, domain, hash).  Basic validation only.
-    Validation stays basic on purpose: it only sorts IOCs into the
-    lookup buckets, it does not judge whether an IOC is real.
-    Args:
-        ioc (str): The IOC to validate.</code></pre>
-  </section>
-      <section id="files">
-        <h2>The files that matter</h2>
-        <table><tr><th>File</th><th>Lines</th></tr>
-        <tr><td><code>main.py</code></td><td>202</td></tr>
-        <tr><td><code>README.md</code></td><td>19</td></tr>
-        <tr><td><code>requirements.txt</code></td><td>2</td></tr>
-        <tr><td><code>banner.png</code></td><td>0</td></tr>
-        <tr><td><code>logo.png</code></td><td>0</td></tr>
-        </table>
-        <p>Names doing the work: <span class="mono">setup_argparse, validate_ioc, get_virustotal_report, get_abuseipdb_report, main</span>.</p>
-      </section>
-      <section id="sheets">
-        <h2>Drawn by hand</h2>
-        <p>I sketch my projects on notebook paper so I have to
-        understand them well enough to draw them. The full set,
-        with the counts and how they were counted, is the
-        <a href="https://github.com/ShadowGuard-AI/analyze-ioc-triage/tree/main/analyze-ioc-triage-Visuals">analyze-ioc-triage-Visuals</a>
-        folder in the repo. Nothing is drawn over the binder holes.
-        That is a rule, not a style.</p>
-        <div class="shots">
-          <img src="assets/architecture.png" alt="Hand drawn architecture sheet for Analyze Ioc Triage">
-          <img src="assets/flowchart.png" alt="Hand drawn flowchart sheet for Analyze Ioc Triage">
-          <img src="assets/product-map.png" alt="Hand drawn product map sheet for Analyze Ioc Triage">
-        </div>
-      </section>
-    </div>
-  </section>
+<section class="mat" id="surface"><h2>Surface station: the charge</h2>
+<p>analyze-ioc-triage quickly triages multiple IOCs, named in the README as IP addresses, domains, and hashes, against public threat intelligence feeds, with VirusTotal and AbuseIPDB given as the examples, in order to prioritize investigation.</p>
+<p>The station repeats the README's own classification line: focused on data analysis and reporting. It claims no scoring method, because the source describes the ranking aim and never sets out a scale, a score field, or a priority order by which the ranking is done.</p>
+</section>
+<div class="soundingline"></div>
+<section class="mat" id="keys"><h2>Station of the keys, hung highest</h2>
+<p>Nothing below this station works without it. The README requires at least one API key, and states the consequence of having none in full: a run with no key performs no lookups, writes no report, and exits with code 1.</p>
+<p>Two keys are documented. For VirusTotal, the documented route is the environment variable VIRUSTOTAL_API_KEY, with the command line option --virustotal_api_key as a fallback. For AbuseIPDB, the documented route is the environment variable ABUSEIPDB_API_KEY, with the command line option --abuseipdb_api_key as a fallback.</p>
+<div class="holdfast"><p>Warning, undiminished: a key given on the command line is visible in shell history and in process listings, and the tool logs a warning when one is used that way.</p></div>
+</section>
+<div class="soundingline"></div>
+<section class="mat" id="aboard"><h2>Middle station: getting aboard and the controls</h2>
+<pre>git clone https://github.com/ShadowGuardAI/analyze-ioc-triage
+./analyze-ioc-triage [params]</pre>
+<p>The clone line is reproduced with its unhyphenated account name intact, exactly as the README prints it.</p>
+<p><code>-h</code> shows a help message and exits. <code>--output</code> gives the path to the output CSV file, defaulting to ioc_report.csv. The two API key options are carried at the station of the keys above, in the order the README lists its controls.</p>
+<div class="holdfast"><p>Set apart: no parameter anywhere in the list says how the IOCs themselves are supplied. No input file, no list argument, and no standard input route is documented for a tool whose whole purpose is to receive many indicators at once.</p></div>
+</section>
+<div class="soundingline"></div>
+<section class="mat" id="deep"><h2>Deep station: reading the report by its status column</h2>
+<p>Each row of the report carries a Lookup Status field, with a per service status of not run, failed, no data, or completed. The README explains why that field exists: so that a blank verdict column can be told apart from a lookup that never ran or one that failed.</p>
+<p>Those four states are the report's honest vocabulary. The source names no other report columns, gives no sample row, and shows no finished report.</p>
+<p>Copyright (c) ShadowGuardAI, with no licence named next to it, reproduced as the closing line of the README stands.</p>
+<p><a href="https://github.com/ShadowGuard-AI/analyze-ioc-triage">The repository on GitHub</a></p>
+</section>
 </main>
-<footer>
-  <p>Analyze Ioc Triage is one of my projects. This page was written
-  from the repo itself on 2026-10-30: the counts are the
-  repo's counts, the code is the repo's code, and the gaps are the
-  repo's gaps.</p>
-</footer>
+</div>
+<footer><p>Theme: kelp cathedral canopy. Type: Averia Libre for headings, Alegreya Sans for reading, both SIL Open Font License 1.1. Lettering reference Silafejira was reference only and is not embedded.</p></footer>
 </body>
 </html>
