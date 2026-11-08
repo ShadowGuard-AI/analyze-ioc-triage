@@ -3,86 +3,70 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>analyze-ioc-triage: Kelp Cathedral Canopy</title>
-<meta name="description" content="analyze-ioc-triage quickly triages multiple IOCs, IP addresses, domains, and hashes, against public threat intelligence feeds such as VirusTotal and AbuseIPDB, to prioritize investigation.">
+<title>analyze-ioc-triage: The Marshalling Yard</title>
 <style>
-@font-face{font-family:'Averia Libre';src:url('fonts/AveriaLibre.ttf') format('truetype');}
-@font-face{font-family:'Alegreya Sans';src:url('fonts/AlegreyaSans.ttf') format('truetype');}
-:root{--shadow:#102a42;--green:#165434;--deep:#1d6a44;--amber:#d8a43c;--pale:#f0d082}
-*{box-sizing:border-box}body{margin:0;background:var(--shadow);color:#e9efe4;font-family:'Alegreya Sans',sans-serif;line-height:1.8}
-h1,h2{font-family:'Averia Libre',serif;color:var(--amber)}
-.hero{min-height:100vh;display:flex;flex-direction:column}
-.hero img.intro{width:100%;height:52vh;object-fit:cover;display:block}
-.hero .plate{padding:1.2rem 6vw 1.6rem}
-.logo{width:150px}
-.wrap{display:flex;gap:0;max-width:1180px;margin:0 auto;width:100%}
-.sounding{flex:0 0 34px;border-right:3px solid rgba(216,164,60,.55);position:relative;margin-left:6vw}
-.sounding:before{content:'';position:absolute;right:-8px;top:0;bottom:0;background:repeating-linear-gradient(180deg,var(--amber) 0 3px,transparent 3px 74px);width:13px}
-main{padding:0 6vw 3rem 2rem;flex:1}
-nav{display:flex;gap:.9rem;flex-wrap:wrap;margin:1rem 0}
-.shellbtn{display:inline-block;background:radial-gradient(ellipse at 35% 30%,#bfe3d8,#7fae9d 45%,#c99ab8 78%,#8fb8a4);color:var(--shadow);font-family:'Averia Libre',serif;text-decoration:none;padding:.65rem 1.3rem;border:3px solid var(--amber);border-radius:50%/62%}
-.shellbtn:hover{filter:brightness(1.18) saturate(1.25)}
-.shellbtn:active{transform:rotate(1deg)}
-.shellbtn:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
-.mat{background:linear-gradient(180deg,#1d6a44,#165434);padding:.2rem 1.5rem 1.4rem;margin:1.8rem 0;border-top:9px solid transparent;border-image:linear-gradient(90deg,var(--amber),#8a742e,var(--amber)) 1}
-.mat h2{margin-top:.8rem}
-.mat pre{background:var(--shadow);color:#e9efe4;padding:1rem;overflow-x:auto;line-height:1.55}
-a{color:var(--pale)}a:before{content:'';display:inline-block;width:12px;height:13px;border-radius:50%;background:var(--amber);margin-right:.5em;vertical-align:-1px;transition:transform .2s}
-a:hover:before{transform:scale(1.3);background:var(--pale)}
-.shellbtn:before{content:none}
-.soundingline{height:14px;margin:2rem 0;border-top:3px solid #0a1e30;position:relative}
-.soundingline:before{content:'';position:absolute;left:0;right:0;top:-6px;height:9px;background:repeating-linear-gradient(90deg,var(--amber) 0 3px,transparent 3px 130px)}
-.soundingline:after{content:'';position:absolute;left:50%;top:-9px;width:4px;height:15px;background:var(--amber)}
-.holdfast{background:var(--shadow);border-radius:18px;padding:.9rem 1.2rem;margin:1rem 0;color:var(--pale);box-shadow:0 10px 0 -4px #0a1e30}
-footer{padding:1rem 6vw 2.4rem;max-width:1180px;margin:0 auto}
+@font-face { font-family: 'Jockey One'; src: url('fonts/JockeyOne-400.woff2') format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Archivo'; src: url('fonts/Archivo-400.woff2') format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Archivo'; src: url('fonts/Archivo-700.woff2') format('woff2'); font-weight: 700; }
+:root { --rust: #7a4a2b; --steel: #3f444a; --gravel: #ddd6c6; --green: #1f9d55; --paper: #f4f1ea; --ink: #23211c; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Archivo', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.6; }
+header.top { display: flex; justify-content: space-between; align-items: center; padding: 16px 28px; background: var(--steel); color: var(--gravel); border-bottom: 5px solid var(--green); }
+.wordmark { font-family: 'Jockey One', sans-serif; letter-spacing: .04em; }
+.lantern { color: #9fe3bb; font-size: .85rem; letter-spacing: .12em; text-transform: uppercase; }
+.hero { text-align: center; padding: 50px 22px 8px; }
+.hero img.logo { width: 180px; height: auto; border: 5px solid var(--steel); border-radius: 6px; }
+h1 { font-family: 'Jockey One', sans-serif; font-weight: 400; font-size: 2.5rem; margin: 18px 0 6px; color: var(--rust); }
+h2 { font-family: 'Jockey One', sans-serif; font-weight: 400; color: var(--rust); border-bottom: 3px solid var(--gravel); padding-bottom: 5px; margin-top: 38px; }
+.tag { max-width: 43rem; margin: 0 auto; }
+.buttons { margin: 22px 0 6px; }
+.buttons a { display: inline-block; margin: 4px; padding: 11px 22px; background: var(--rust); color: #fff; font-weight: 700; text-decoration: none; border-radius: 4px; }
+.buttons a.alt { background: transparent; color: var(--steel); border: 2px solid var(--steel); }
+figure.wide { max-width: 1020px; margin: 24px auto; padding: 0 18px; }
+figure.wide img { width: 100%; height: auto; display: block; border: 1px solid var(--gravel); }
+figcaption { color: #6f6a5c; font-size: .9rem; padding-top: 8px; text-align: center; }
+.strip { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; padding: 20px 18px; }
+.strip div { background: #fff; border: 1px solid var(--gravel); border-top: 4px solid var(--green); padding: 13px 18px; min-width: 180px; text-align: center; }
+.strip b { display: block; font-family: 'Jockey One', sans-serif; font-weight: 400; color: var(--rust); font-size: 1.05rem; }
+main { max-width: 880px; margin: 0 auto; padding: 8px 22px 30px; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid var(--gravel); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--steel); color: var(--gravel); }
+code { background: #e6dfcd; padding: 1px 6px; border-radius: 3px; }
+.hold { border-left: 5px solid var(--green); background: #e2f0e7; padding: 13px 18px; }
+footer { text-align: center; padding: 24px 18px 32px; color: #6f6a5c; font-size: .9rem; border-top: 5px solid var(--green); margin-top: 28px; }
 </style>
 </head>
 <body>
-<header class="hero">
-<img class="intro" src="assets/intro-banner.png" alt="A kelp forest alone: fronds and amber bladders in the foreground, a sleeping otter anchored by a looped strand at the surface, shafts of light, still fish, and two pale gulls on the bright canopy mat, no text">
-<div class="plate">
-<img class="logo" src="assets/logo.png" alt="Sea otter floating on its back among kelp fronds, an amber strand looped around its body, amber bladders along the stems and one abalone shell at the lower edge">
-<h1>analyze-ioc-triage</h1>
-<p>A descent that ends at the canopy, with content stations hung at depths along a sounding line down the left margin.</p>
-<nav>
-<a class="shellbtn" href="#surface">Surface: the charge</a>
-<a class="shellbtn" href="#keys">Station of the keys</a>
-<a class="shellbtn" href="#aboard">Getting aboard</a>
-<a class="shellbtn" href="#deep">Deep: the report</a>
-</nav>
+<header class="top"><span class="wordmark">analyze-ioc-triage</span><span class="lantern">One lane lit first</span></header>
+<section class="hero">
+<img class="logo" src="assets/logo.png" alt="Fan of railway tracks from directly above spreading across pale gravel, three rust brown wagons standing one to a track and one green signal lantern lit beside the nearest rails">
+<h1>The Marshalling Yard</h1>
+<p class="tag">Quickly triages multiple IOCs (IP addresses, domains, hashes) against public threat intelligence feeds (e.g., VirusTotal, AbuseIPDB) to prioritize investigation. A marshalling yard uncouples one mixed arrival and rolls each wagon onto its own track, worst first; this tool checks each indicator and ranks what needs investigation first.</p>
+<p class="buttons"><a href="https://github.com/ShadowGuard-AI/analyze-ioc-triage">View on GitHub</a> <a class="alt" href="https://github.com/ShadowGuard-AI/analyze-ioc-triage#readme">Read the README</a></p>
+</section>
+<figure class="wide"><img src="assets/intro-banner.png" alt="The points of the marshalling yard close up at dusk, the fan of tracks opening toward the sorted rust brown wagons, a green signal lantern lit beside the rails and its light reflected on the steel"><figcaption>The points close up, the green lantern's light caught on the rail of the lit lane.</figcaption></figure>
+<div class="strip">
+<div><b>Two feeds</b>VirusTotal and AbuseIPDB</div>
+<div><b>One key minimum</b>or the run does not start</div>
+<div><b>Lookup Status</b>on every report row</div>
+<div><b>ioc_report.csv</b>the default report name</div>
 </div>
-<img src="assets/banner.png" alt="Kelp forest canopy with light in shafts, two gulls on the floating mat, a sleeping otter wrapped in a frond in the foreground, and the project name lettered in pale amber along the underside of the canopy" style="width:100%;display:block">
-</header>
-<div class="wrap">
-<div class="sounding" aria-hidden="true"></div>
 <main>
-<section class="mat" id="surface"><h2>Surface station: the charge</h2>
-<p>analyze-ioc-triage quickly triages multiple IOCs, named in the README as IP addresses, domains, and hashes, against public threat intelligence feeds, with VirusTotal and AbuseIPDB given as the examples, in order to prioritize investigation.</p>
-<p>The station repeats the README's own classification line: focused on data analysis and reporting. It claims no scoring method, because the source describes the ranking aim and never sets out a scale, a score field, or a priority order by which the ranking is done.</p>
-</section>
-<div class="soundingline"></div>
-<section class="mat" id="keys"><h2>Station of the keys, hung highest</h2>
-<p>Nothing below this station works without it. The README requires at least one API key, and states the consequence of having none in full: a run with no key performs no lookups, writes no report, and exits with code 1.</p>
-<p>Two keys are documented. For VirusTotal, the documented route is the environment variable VIRUSTOTAL_API_KEY, with the command line option --virustotal_api_key as a fallback. For AbuseIPDB, the documented route is the environment variable ABUSEIPDB_API_KEY, with the command line option --abuseipdb_api_key as a fallback.</p>
-<div class="holdfast"><p>Warning, undiminished: a key given on the command line is visible in shell history and in process listings, and the tool logs a warning when one is used that way.</p></div>
-</section>
-<div class="soundingline"></div>
-<section class="mat" id="aboard"><h2>Middle station: getting aboard and the controls</h2>
-<pre>git clone https://github.com/ShadowGuardAI/analyze-ioc-triage
-./analyze-ioc-triage [params]</pre>
-<p>The clone line is reproduced with its unhyphenated account name intact, exactly as the README prints it.</p>
-<p><code>-h</code> shows a help message and exits. <code>--output</code> gives the path to the output CSV file, defaulting to ioc_report.csv. The two API key options are carried at the station of the keys above, in the order the README lists its controls.</p>
-<div class="holdfast"><p>Set apart: no parameter anywhere in the list says how the IOCs themselves are supplied. No input file, no list argument, and no standard input route is documented for a tool whose whole purpose is to receive many indicators at once.</p></div>
-</section>
-<div class="soundingline"></div>
-<section class="mat" id="deep"><h2>Deep station: reading the report by its status column</h2>
-<p>Each row of the report carries a Lookup Status field, with a per service status of not run, failed, no data, or completed. The README explains why that field exists: so that a blank verdict column can be told apart from a lookup that never ran or one that failed.</p>
-<p>Those four states are the report's honest vocabulary. The source names no other report columns, gives no sample row, and shows no finished report.</p>
-<p>Copyright (c) ShadowGuardAI, with no licence named next to it, reproduced as the closing line of the README stands.</p>
-<p><a href="https://github.com/ShadowGuard-AI/analyze-ioc-triage">The repository on GitHub</a></p>
-</section>
+<h2>What it does</h2>
+<p>The tool takes multiple indicators of compromise and checks each one against public threat intelligence feeds, so an investigator can see which ones deserve attention first. Usage, as the README gives it: <code>./analyze-ioc-triage [params]</code>. Its requirements are <code>pandas&gt;=2.1.0</code> and <code>requests&gt;=2.31.0</code>.</p>
+<figure class="wide" style="padding:0;margin:18px 0;"><img src="assets/banner.png" alt="Gravel marshalling yard at dusk, one arriving line of rust brown wagons split across a fan of separate tracks, each wagon standing alone on its own rail, steel points gleaming between the tracks and one green signal lantern lit over the first lane"></figure>
+<h2>Parameters</h2>
+<table>
+<tr><th>Parameter</th><th>What the README says</th></tr>
+<tr><td><code>-h</code></td><td>Show help message and exit</td></tr>
+<tr><td><code>--output</code></td><td>Path to the output CSV file. Defaults to ioc_report.csv</td></tr>
+<tr><td><code>--virustotal_api_key</code></td><td>Your VirusTotal API key. The documented route is the VIRUSTOTAL_API_KEY environment variable. This command line option is kept as a fallback, but a key given here is visible in shell history and process listings, and the tool logs a warning when it is used</td></tr>
+<tr><td><code>--abuseipdb_api_key</code></td><td>Your AbuseIPDB API key. The documented route is the ABUSEIPDB_API_KEY environment variable. This command line option is kept as a fallback, but a key given here is visible in shell history and process listings, and the tool logs a warning when it is used</td></tr>
+</table>
+<h2>Stated limits</h2>
+<div class="hold"><p>At least one API key is required: a run with no key performs no lookups, writes no report, and exits 1. Each row of the report carries a Lookup Status field with a per service status of not run, failed, no data, or completed, so a blank verdict column can be told apart from a lookup that never ran or one that failed. A key given on the command line is visible in shell history and in process listings, and the tool logs a warning when one is used that way; the documented route for each key is its environment variable. No parameter in the README states how the IOCs themselves are supplied, by file, by argument, or by standard input, so how the indicators are handed to the tool is undocumented. The licence line at the close of the README is a copyright line only, with no licence named.</p></div>
 </main>
-</div>
-<footer><p>Theme: kelp cathedral canopy. Type: Averia Libre for headings, Alegreya Sans for reading, both SIL Open Font License 1.1. Lettering reference Silafejira was reference only and is not embedded.</p></footer>
+<footer>analyze-ioc-triage, sorted by urgency. Fonts: Jockey One and Archivo, self-hosted under the SIL Open Font License.</footer>
 </body>
 </html>
