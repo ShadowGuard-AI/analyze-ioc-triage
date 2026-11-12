@@ -7,9 +7,7 @@
 <p align="center"><img src="logo.png" alt="Fan of railway tracks from directly above spreading across pale gravel, three rust brown wagons standing one to a track and one green signal lantern lit beside the nearest rails" width="180"></p>
 
 ![Kelp bed cross section scene: light shafts sway, the otter rocks at its anchor, octopus arms curl around stems, and fish cross still coral](scene.svg)
-
-# analyze-ioc-triage
-Quickly triages multiple IOCs (IP addresses, domains, hashes) against public threat intelligence feeds (e.g., VirusTotal, AbuseIPDB) to prioritize investigation. - Focused on Data analysis and reporting
+Quickly triages multiple IOCs (IP addresses, domains, hashes) against public threat intelligence feeds (e.g., VirusTotal, AbuseIPDB) to prioritize investigation, focusing on automated data analysis and reporting
 
 ## Install
 `git clone https://github.com/ShadowGuardAI/analyze-ioc-triage`
